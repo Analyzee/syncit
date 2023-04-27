@@ -2046,6 +2046,13 @@
   dependencies:
     rrweb-snapshot "^2.0.0-alpha.5"
 
+"@rrweb/types@^2.0.0-alpha.8":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@rrweb/types/-/types-2.0.0-alpha.8.tgz#29a6550dd833364a459af4be4ce3b233003fb78b"
+  integrity sha512-yAr6ZQrgmr7+qZU5DMGqYXnVsolC5epftmZtkOtgFD/bbvCWflNnl09M32hUjttlKCV1ohhmQGioXkCQ37IF7A==
+  dependencies:
+    rrweb-snapshot "^2.0.0-alpha.8"
+
 "@rushstack/node-core-library@3.55.2", "@rushstack/node-core-library@^3.53.2":
   version "3.55.2"
   resolved "https://registry.yarnpkg.com/@rushstack/node-core-library/-/node-core-library-3.55.2.tgz#d951470bac98171de13a8a351d4537c63fbfd0b6"
@@ -8957,31 +8964,34 @@ rollup@^3.10.0:
   optionalDependencies:
     fsevents "~2.3.2"
 
-rrdom@^2.0.0-alpha.5:
-  version "2.0.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/rrdom/-/rrdom-2.0.0-alpha.5.tgz#0317ccde6cdbb080913fc39f8f3ffe46a65fd733"
-  integrity sha512-PG3HeIKFDBA0fruYxE7mLhusy6tzemREvaZQkiaJv7RG1q6V3IzwYLZG1cv4PB4jEqJU9zIXw6xdguRpQyZBFQ==
+rrdom@^2.0.0-alpha.8:
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/rrdom/-/rrdom-2.0.0-alpha.8.tgz#d8561ca0b95cae8b8fe14ed29179ddd8fc18a60d"
+  integrity sha512-rUyeS9fSOO6uSxCdeY5bQkKQTPECIgxsOCb/WR7eA/UsVkVpdDOyCV43wxm92V2JOtqMuv+36rUpEDFW+YFjOw==
   dependencies:
-    rrweb-snapshot "^2.0.0-alpha.5"
+    rrweb-snapshot "^2.0.0-alpha.8"
 
 rrweb-snapshot@^2.0.0-alpha.5:
   version "2.0.0-alpha.5"
   resolved "https://registry.yarnpkg.com/rrweb-snapshot/-/rrweb-snapshot-2.0.0-alpha.5.tgz#81a47b3550c04b1b7b6c0e769bfcdb623a1ef757"
   integrity sha512-zVMSitLyFN6BNI1FFNvF+XY+t4t9jnTq46s2UinpaBEOgdnvVXgvEJkda1hj/eU5vWQaNGU67QzDMiHtGZSSPQ==
 
-rrweb@^2.0.0-alpha.5:
-  version "2.0.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/rrweb/-/rrweb-2.0.0-alpha.5.tgz#84b5e847403ff0b915aacea8833ccece12bc2f51"
-  integrity sha512-YY+kBc9GJV/HTSsDej5hYSK4RWWH3QttwGWUtSAX2v8JDrVztoYlcBE9/YQRbatlGE0sVEL1AJzXMA9xs/U9hQ==
+rrweb-snapshot@^2.0.0-alpha.8:
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/rrweb-snapshot/-/rrweb-snapshot-2.0.0-alpha.8.tgz#5f93f8ab7d78b3de26f6a64e993ff68edd54e0cf"
+  integrity sha512-3Rb7c+mnDEADQ8N9qn9SDH5PzCyHlZ1cwZC932qRyt9O8kJWLM11JLYqqEyQCa2FZVQbzH2iAaCgnyM7A32p7A==
+
+"rrweb@file:../rrweb/packages/rrweb":
+  version "2.0.0-alpha.8"
   dependencies:
-    "@rrweb/types" "^2.0.0-alpha.5"
+    "@rrweb/types" "^2.0.0-alpha.8"
     "@types/css-font-loading-module" "0.0.7"
     "@xstate/fsm" "^1.4.0"
     base64-arraybuffer "^1.0.1"
     fflate "^0.4.4"
     mitt "^3.0.0"
-    rrdom "^2.0.0-alpha.5"
-    rrweb-snapshot "^2.0.0-alpha.5"
+    rrdom "^2.0.0-alpha.8"
+    rrweb-snapshot "^2.0.0-alpha.8"
 
 rtcpeerconnection-shim@^1.2.15:
   version "1.2.15"

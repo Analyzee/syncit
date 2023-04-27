@@ -22,10 +22,22 @@
 	import { t } from '../locales';
 	import type { PaintingConfig } from './types';
 
-	let uid = '';
+	export let uid = '';
 
 	export let createTransporter: ({ role, uid }: { role: string; uid: string }) => Transporter;
 	export let bufferMs: number;
+
+	export function getData() {
+		return {
+			replayer,
+			service,
+			controlService,
+			uid,
+			transporter,
+			playerDom,
+			sizes
+		};
+	}
 
 	let transporter: Transporter;
 	let login: undefined | Promise<void>;
@@ -68,126 +80,131 @@
 	let sharingPDF = false;
 	let pdfEl: PDF;
 
-	function init() {
-		transporter = createTransporter({
-			role: 'app',
-			uid
-		});
-
-		transporter.on(TransporterEvents.SourceReady, () => {
-			service.send('SOURCE_READY');
-			replayer = new Replayer([], {
-				root: playerDom,
-				loadTimeout: 100,
-				liveMode: true,
-				insertStyleRules: [
-					'.syncit-embed, #syncit-canvas, #syncit-pdf { display: none !important }'
-				],
-				showWarning: true,
-				showDebug: true,
-				mouseTail: false
+	export function init() {
+		return new Promise<void>((resolve) => {
+			transporter = createTransporter({
+				role: 'app',
+				uid
 			});
 
-			replayer.on('custom-event', (event) => {
-				switch ((event as customEvent).data.tag) {
-					case CustomEventTags.StartPaint:
-						painting = true;
-						break;
-					case CustomEventTags.EndPaint:
-						painting = false;
-						break;
-					case CustomEventTags.SetPaintingConfig:
-						paintingConfig = (event as customEvent<{ config: PaintingConfig }>).data.payload.config;
-						break;
-					case CustomEventTags.StartLine:
-						canvasEl && canvasEl.startLine();
-						break;
-					case CustomEventTags.EndLine:
-						canvasEl && canvasEl.endLine();
-						break;
-					case CustomEventTags.DrawLine:
-						canvasEl &&
+			transporter.on(TransporterEvents.SourceReady, () => {
+				service.send('SOURCE_READY');
+				replayer = new Replayer([], {
+					root: playerDom,
+					loadTimeout: 100,
+					liveMode: true,
+					insertStyleRules: [
+						'.syncit-embed, #syncit-canvas, #syncit-pdf { display: none !important }',
+						'.analyzee-assist-operator-mouse { display: none !important }'
+					],
+					showWarning: true,
+					showDebug: true,
+					mouseTail: false
+				});
+
+				replayer.on('custom-event', (event) => {
+					switch ((event as customEvent).data.tag) {
+						case CustomEventTags.StartPaint:
+							painting = true;
+							break;
+						case CustomEventTags.EndPaint:
+							painting = false;
+							break;
+						case CustomEventTags.SetPaintingConfig:
+							paintingConfig = (event as customEvent<{ config: PaintingConfig }>).data.payload.config;
+							break;
+						case CustomEventTags.StartLine:
+							canvasEl && canvasEl.startLine();
+							break;
+						case CustomEventTags.EndLine:
+							canvasEl && canvasEl.endLine();
+							break;
+						case CustomEventTags.DrawLine:
+							canvasEl &&
 							canvasEl.setPoints((event as customEvent<{ points: number }>).data.payload.points);
-						break;
-					case CustomEventTags.Highlight:
-						canvasEl &&
+							break;
+						case CustomEventTags.Highlight:
+							canvasEl &&
 							canvasEl.highlight(
-								(event as customEvent<{ top: number; left: number }>).data.payload.left,
-								(event as customEvent<{ top: number; left: number }>).data.payload.top
+									(event as customEvent<{ top: number; left: number }>).data.payload.left,
+									(event as customEvent<{ top: number; left: number }>).data.payload.top
 							);
-						break;
-					default:
+							break;
+						default:
+					}
+				});
+
+				controlService = createAppControlService({
+					transporter,
+					replayer
+				});
+				controlCurrent = controlService.state;
+
+				controlService.start();
+				controlService.subscribe((state) => {
+					controlCurrent = state;
+				});
+
+				transporter.sendStart();
+
+				resolve();
+			});
+
+			transporter.on(TransporterEvents.SendRecord, (data) => {
+				const { id, data: event, t } = (data as TransportSendRecordEvent).payload;
+				if (!current.matches('connected')) {
+					replayer.startLive(event.timestamp - buffer.bufferMs);
+					service.send('FIRST_RECORD');
 				}
-			});
-
-			controlService = createAppControlService({
-				transporter,
-				replayer
-			});
-			controlCurrent = controlService.state;
-
-			controlService.start();
-			controlService.subscribe((state) => {
-				controlCurrent = state;
-			});
-
-			transporter.sendStart();
-		});
-
-		transporter.on(TransporterEvents.SendRecord, (data) => {
-			const { id, data: event, t } = (data as TransportSendRecordEvent).payload;
-			if (!current.matches('connected')) {
-				replayer.startLive(event.timestamp - buffer.bufferMs);
-				service.send('FIRST_RECORD');
-			}
-			if (event.type === EventType.Custom) {
-				switch (event.data.tag) {
-					case CustomEventTags.Ping:
-						latencies = latencies.concat({ x: t, y: Date.now() - t });
-						break;
-					case CustomEventTags.MouseSize:
-						mouseSize = `syncit-mouse-s${
-							(event as customEvent<{ level: number }>).data.payload.level
-						}`;
-						break;
-					case CustomEventTags.AcceptRemoteControl:
-						controlService.send({
-							type: 'ACCEPTED',
-							payload: { replayer }
-						});
-						break;
-					case CustomEventTags.StopRemoteControl:
-						controlService.send('STOP_CONTROL');
-						break;
-					case CustomEventTags.OpenPDF:
-						sharingPDF = true;
-						tick().then(() => {
-							pdfEl.renderPDF({
-								dataURI: (event as customEvent<{ dataURI: string | ArrayBuffer | null }>).data
-									.payload.dataURI
+				if (event.type === EventType.Custom) {
+					switch (event.data.tag) {
+						case CustomEventTags.Ping:
+							latencies = latencies.concat({ x: t, y: Date.now() - t });
+							break;
+						case CustomEventTags.MouseSize:
+							mouseSize = `syncit-mouse-s${
+									(event as customEvent<{ level: number }>).data.payload.level
+							}`;
+							break;
+						case CustomEventTags.AcceptRemoteControl:
+							controlService.send({
+								type: 'ACCEPTED',
+								payload: { replayer }
 							});
-						});
-						break;
-					case CustomEventTags.ClosePDF:
-						sharingPDF = false;
-						break;
-					default:
-						break;
+							break;
+						case CustomEventTags.StopRemoteControl:
+							controlService.send('STOP_CONTROL');
+							break;
+						case CustomEventTags.OpenPDF:
+							sharingPDF = true;
+							tick().then(() => {
+								pdfEl.renderPDF({
+									dataURI: (event as customEvent<{ dataURI: string | ArrayBuffer | null }>).data
+											.payload.dataURI
+								});
+							});
+							break;
+						case CustomEventTags.ClosePDF:
+							sharingPDF = false;
+							break;
+						default:
+							break;
+					}
 				}
-			}
-			Promise.resolve().then(() => collectSize(t, JSON.stringify(event)));
-			const chunk: Chunk<eventWithTime> = { id, data: event, t: event.timestamp };
-			buffer.addWithCheck(chunk);
-			transporter.ackRecord(id);
-		});
-		transporter.on(TransporterEvents.Stop, () => {
-			service.send('STOP');
-		});
+				Promise.resolve().then(() => collectSize(t, JSON.stringify(event)));
+				const chunk: Chunk<eventWithTime> = { id, data: event, t: event.timestamp };
+				buffer.addWithCheck(chunk);
+				transporter.ackRecord(id);
+			});
+			transporter.on(TransporterEvents.Stop, () => {
+				service.send('STOP');
+			});
 
-		login = (async () => {
-			await transporter.login();
-			await transporter.sendMirrorReady();
-		})();
+			login = (async () => {
+				await transporter.login();
+				await transporter.sendMirrorReady();
+			})();
+		});
 	}
 
 	function reset() {

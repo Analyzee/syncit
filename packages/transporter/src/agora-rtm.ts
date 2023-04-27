@@ -24,6 +24,7 @@ export class AgoraRtmTransporter implements Transporter {
     [TransporterEvents.AckRecord]: [],
     [TransporterEvents.Stop]: [],
     [TransporterEvents.RemoteControl]: [],
+    [TransporterEvents.OperatorMouseMove]: [],
   };
 
   client: ReturnType<typeof AgoraRTM.createInstance>;

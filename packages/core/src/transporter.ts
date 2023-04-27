@@ -10,6 +10,7 @@ export enum TransporterEvents {
   AckRecord,
   Stop,
   RemoteControl,
+  OperatorMouseMove
 }
 // export type TransportEventHandlerParamsSourceReady = {
 //   params: { event: TransporterEvents.SourceReady };

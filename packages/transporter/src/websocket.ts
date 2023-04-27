@@ -17,6 +17,7 @@ export class WebSocketTransporter implements Transporter {
     [TransporterEvents.AckRecord]: [],
     [TransporterEvents.Stop]: [],
     [TransporterEvents.RemoteControl]: [],
+    [TransporterEvents.OperatorMouseMove]: [],
   };
 
   ws: WebSocket;
@@ -26,7 +27,7 @@ export class WebSocketTransporter implements Transporter {
     this.ws = new WebSocket(url);
     this.ws.onmessage = event => {
       const message = JSON.parse(event.data);
-      this.handlers[message.event as TransporterEvents].map(h =>
+      this.handlers[message.event as TransporterEvents]?.map(h =>
         h({
           event: message.event,
           payload: message.payload,
@@ -48,7 +49,7 @@ export class WebSocketTransporter implements Transporter {
     this.ws.send(JSON.stringify(params));
     // jest could not listen to storage event in JSDOM, not a big deal at here.
     if (process.env.NODE_ENV === 'test') {
-      this.handlers[params.event].map(h => h(params));
+      this.handlers[params.event]?.map(h => h(params));
     }
   }
 

@@ -4,7 +4,7 @@ import { createMachine, interpret, assign, EventObject } from 'xstate';
 import { Replayer, record } from 'rrweb';
 import { listenerHandler, eventWithTime } from '@rrweb/types';
 import { Transporter } from './transporter';
-import { SourceBuffer, Chunk } from './buffer';
+import { SourceBuffer } from './buffer';
 import { onMirror, RemoteControlActions, CustomEventTags } from './common';
 
 export const createAppService = (onStop: () => void) => {
@@ -111,7 +111,7 @@ export const createAppControlService = (
             return {
               ...context,
               stopControl: onMirror(
-                replayer.getMirror(),
+                replayer.getMirror() as never,
                 replayer.iframe,
                 payload => {
                   transporter.sendRemoteControl(payload);
@@ -193,8 +193,11 @@ export const createEmbedService = (context: EmbedContext) => {
             buffer.reset();
             // start a session
             const stopRecord = record({
+              blockClass: 'analyzee-block',
+              ignoreClass: 'analyzee-ignore',
+              maskTextClass: 'analyzee-mask',
               emit(event) {
-                const id = buffer.add(event);
+                const id = buffer.add(event as never);
                 transporter.sendRecord(buffer.buffer[id]);
               },
               inlineStylesheet: false,

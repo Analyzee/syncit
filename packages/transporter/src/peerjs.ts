@@ -1,13 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import './parcel-require';
 import Peer from 'peerjs';
-import {
-  Transporter,
-  TransporterEvents,
-  TransporterEventHandler,
-} from '@syncit/core';
-import { Chunk, RemoteControlPayload } from '@syncit/core';
-import { eventWithTime } from '@rrweb/types';
+import {Chunk, RemoteControlPayload, Transporter, TransporterEventHandler, TransporterEvents,} from '@syncit/core';
+import {eventWithTime} from '@rrweb/types';
 
 export type PeerjsTransporterOptions = {
   uid: string;
@@ -15,6 +10,9 @@ export type PeerjsTransporterOptions = {
   peerHost: string;
   peerPort: number;
   peerPath: string;
+  secure?: boolean;
+  debug?: boolean;
+  key?: string;
 };
 
 const sleep = (ms: number) =>
@@ -33,6 +31,7 @@ export class PeerjsTransporter implements Transporter {
     [TransporterEvents.AckRecord]: [],
     [TransporterEvents.Stop]: [],
     [TransporterEvents.RemoteControl]: [],
+    [TransporterEvents.OperatorMouseMove]: [],
   };
 
   uid: string;
@@ -42,13 +41,15 @@ export class PeerjsTransporter implements Transporter {
   opened = false;
 
   constructor(options: PeerjsTransporterOptions) {
-    const { uid, role, peerHost, peerPort, peerPath } = options;
+    const {uid, role, peerHost, peerPort, peerPath} = options;
     this.uid = uid;
     this.role = role;
     this.peer = new Peer(`${this.uid}-${this.role}`, {
       host: peerHost,
       port: peerPort,
       path: peerPath,
+      secure: options.secure,
+      key: options.key
     });
     this.peer.on('connection', conn => {
       this.conn = conn;
@@ -57,7 +58,7 @@ export class PeerjsTransporter implements Transporter {
         console.info('connection opened', Date.now());
       });
       conn.on('data', data => {
-        const { event, payload } = data;
+        const {event, payload} = data;
         this.handlers[event as TransporterEvents].map(h =>
           h({
             event: event,
@@ -95,7 +96,7 @@ export class PeerjsTransporter implements Transporter {
         resolve(undefined);
       });
       conn.on('data', data => {
-        const { event, payload } = data;
+        const {event, payload} = data;
         this.handlers[event as TransporterEvents].map(h =>
           h({
             event: event,

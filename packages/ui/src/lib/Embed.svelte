@@ -33,7 +33,7 @@
 	export let lang: string | undefined = undefined;
 
 	const nanoid = customAlphabet('1234567890abcdef', 10);
-	let uid = nanoid();
+	export let uid = nanoid();
 	const transporter = createTransporter({
 		uid,
 		role: 'embed'
@@ -57,14 +57,16 @@
 	let blockElSet = new Set<HTMLElement>();
 	$: blockEls = Array.from(blockElSet);
 
-	const service = createEmbedService({
+	export const recordFn = record;
+
+	export const service = createEmbedService({
 		transporter,
 		record,
 		stopRecordFn: null,
 		buffer
 	});
 	let current = service.state;
-	const controlService = createEmbedControlService({
+	export const controlService = createEmbedControlService({
 		record
 	});
 	let controlCurrent = controlService.state;
@@ -229,6 +231,12 @@
 					break;
 			}
 		});
+
+
+		/**
+		 * Analyzee
+		 */
+		service.send('START');
 	});
 	onDestroy(() => {
 		service.stop();

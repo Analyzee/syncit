@@ -18,6 +18,7 @@ export class LocalStorageTransporter implements Transporter {
     [TransporterEvents.AckRecord]: [],
     [TransporterEvents.Stop]: [],
     [TransporterEvents.RemoteControl]: [],
+    [TransporterEvents.OperatorMouseMove]: [],
   };
 
   constructor() {
