@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { eventWithTime } from '@rrweb/types';
-import { Chunk, RemoteControlPayload } from '@syncit/core';
+import {eventWithTime} from '@rrweb/types';
 import {
+  Chunk,
+  RemoteControlPayload,
   Transporter,
-  TransporterEvents,
   TransporterEventHandler,
-  TransporterHandlers,
+  TransporterEvents,
+  TransporterHandlers
 } from '@syncit/core';
 
 export class WebSocketTransporter implements Transporter {
@@ -23,7 +24,7 @@ export class WebSocketTransporter implements Transporter {
   ws: WebSocket;
 
   constructor(options: { url: string }) {
-    const { url } = options;
+    const {url} = options;
     this.ws = new WebSocket(url);
     this.ws.onmessage = event => {
       const message = JSON.parse(event.data);
@@ -35,6 +36,11 @@ export class WebSocketTransporter implements Transporter {
       );
     };
   }
+
+  /**
+   * @private Filter remote control (returns true if the remote control event should be sent)
+   */
+  filterRemoteControl: (payload: RemoteControlPayload) => boolean = () => true;
 
   login() {
     return Promise.resolve(true);
@@ -98,6 +104,11 @@ export class WebSocketTransporter implements Transporter {
   }
 
   sendRemoteControl(payload: RemoteControlPayload) {
+    const shouldSend = this.filterRemoteControl(payload);
+    if (!shouldSend) {
+      return Promise.resolve();
+    }
+
     this.setItem({
       event: TransporterEvents.RemoteControl,
       payload,

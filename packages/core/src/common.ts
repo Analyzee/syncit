@@ -194,7 +194,7 @@ export function onMirror(
   };
 }
 
-export function isIgnoredOnRmoteControl(event: eventWithTime): boolean {
+export function isIgnoredOnRemoteControl(event: eventWithTime): boolean {
   switch (true) {
     case event.type === EventType.IncrementalSnapshot &&
       event.data.source === IncrementalSource.MouseInteraction:

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { createMachine, interpret, assign, EventObject } from 'xstate';
-import { Replayer, record } from 'rrweb';
-import { listenerHandler, eventWithTime } from '@rrweb/types';
-import { Transporter } from './transporter';
-import { SourceBuffer } from './buffer';
-import { onMirror, RemoteControlActions, CustomEventTags } from './common';
+import {assign, createMachine, EventObject, interpret} from 'xstate';
+import {record, Replayer} from 'rrweb';
+import {eventWithTime, listenerHandler} from '@rrweb/types';
+import {Transporter} from './transporter';
+import {SourceBuffer} from './buffer';
+import {CustomEventTags, onMirror, RemoteControlActions} from './common';
 
 export const createAppService = (onStop: () => void) => {
   return interpret(
@@ -100,12 +100,12 @@ export const createAppControlService = (
             });
           },
           accepted: assign((context, event) => {
-            const { transporter } = context;
-            const { replayer } = (event as EventObject & {
+            const {transporter} = context;
+            const {replayer} = (event as EventObject & {
               payload: { replayer: Replayer };
             }).payload;
             if (!replayer) {
-              throw new Error('Replayer should be inited.');
+              throw new Error('Replayer should be initiated.');
             }
             replayer.enableInteract();
             return {
@@ -121,9 +121,9 @@ export const createAppControlService = (
             };
           }),
           stopControl(context) {
-            const { transporter, replayer, stopControl } = context;
+            const {transporter, replayer, stopControl} = context;
             if (!replayer) {
-              throw new Error('Replayer should be inited.');
+              throw new Error('Replayer should be initiated.');
             }
             transporter.sendRemoteControl({
               action: RemoteControlActions.Stop,
@@ -185,9 +185,10 @@ export const createEmbedService = (context: EmbedContext) => {
       },
       {
         actions: {
-          start() {},
+          start() {
+          },
           connect: assign(context => {
-            const { record, buffer, transporter, stopRecordFn } = context;
+            const {record, buffer, transporter, stopRecordFn} = context;
             // reset before connect
             stopRecordFn?.();
             buffer.reset();
@@ -210,7 +211,7 @@ export const createEmbedService = (context: EmbedContext) => {
             };
           }),
           stop(context) {
-            const { stopRecordFn, transporter, buffer } = context;
+            const {stopRecordFn, transporter, buffer} = context;
             stopRecordFn?.();
             transporter.sendStop();
             buffer.reset();
