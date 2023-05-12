@@ -77,6 +77,7 @@ export function onMirror(
   const handlers: listenerHandler[] = [];
 
   const clickCb = (evt: Event) => {
+    evt.preventDefault();
     const target = evt.target;
     if (!mirror.hasNode(target as Node)) {
       return;
