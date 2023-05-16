@@ -220,7 +220,19 @@ export function applyMirrorAction(
       if (!node) {
         return;
       }
-      ((node as unknown) as HTMLElement).click();
+
+      const element = (node as HTMLElement);
+
+      /**
+       * Add additional check for click property since
+       * some elements like SVG don't have click method
+       */
+      if (element.click) {
+        element.click();
+      } else {
+        element.parentElement?.click?.();
+      }
+
       break;
     }
     case RemoteControlActions.Scroll: {
