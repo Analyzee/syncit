@@ -104,7 +104,7 @@
           liveMode: true,
           insertStyleRules: [
             '.syncit-embed, #syncit-canvas, #syncit-pdf { display: none !important }',
-            '.analyzee-assist-operator-mouse { display: none !important }'
+            '.analyzee-assist-operator-mouse { pointer-events: none !important }'
           ],
           showWarning: true,
           showDebug: true,
